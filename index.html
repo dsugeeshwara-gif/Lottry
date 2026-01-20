@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="si">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>මහජන සම්පත - වාසනාව</title>
+    <style>
+        body { font-family: 'Segoe UI', sans-serif; text-align: center; background-color: #f8f9fa; padding: 15px; }
+        .main-card { background: white; padding: 20px; border-radius: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); max-width: 450px; margin: auto; border-top: 8px solid #ffcc00; }
+        .grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; margin: 20px 0; max-height: 300px; overflow-y: auto; padding: 10px; border: 1px solid #eee; border-radius: 10px; }
+        button { padding: 12px; font-size: 16px; border: 1px solid #ddd; background: #fff; border-radius: 8px; cursor: pointer; transition: 0.2s; }
+        .selected { background: #ffcc00 !important; border-color: #e6b800; font-weight: bold; transform: scale(1.1); }
+        input { padding: 12px; width: 90%; margin: 10px 0; border-radius: 8px; border: 1px solid #ccc; font-size: 16px; text-align: center; }
+        .submit-btn { background: #25D366; color: white; padding: 18px; width: 100%; border: none; border-radius: 12px; font-size: 18px; font-weight: bold; margin-top: 20px; cursor: pointer; box-shadow: 0 4px 10px rgba(37, 211, 102, 0.3); }
+        h2 { color: #333; margin-bottom: 5px; }
+        .win-box { background: #fff8e1; padding: 10px; border-radius: 10px; margin: 15px 0; border: 1px dashed #ffa000; }
+    </style>
+</head>
+<body>
+
+    <div class="main-card">
+        <h2>🏆 මහජන සම්පත 🏆</h2>
+        <p style="color: #666;">අවසාන අංක 2 නිවැරදිව අනුමාන කරන්න</p>
+        
+        <input type="text" id="custName" placeholder="ඔබේ නම ඇතුළත් කරන්න">
+
+        <p style="font-weight: bold; margin-bottom: 5px;">අංකය තෝරන්න (00-99):</p>
+        <div class="grid" id="numberGrid"></div>
+
+        <div class="win-box">
+            ඔට්ටුව: රු. <input type="number" id="amount" value="100" min="100" style="width: 80px;" oninput="updateWin()"> <br>
+            <b>දිනුම් මුදල: රු. <span id="winDisplay">7500</span></b>
+        </div>
+
+        <button class="submit-btn" onclick="sendToWA()">රිසිට්පත යොමු කරන්න 📩</button>
+    </div>
+
+    <script>
+        let selectedNum = null;
+        const grid = document.getElementById('numberGrid');
+
+        for (let i = 0; i < 100; i++) {
+            let n = i.toString().padStart(2, '0');
+            let btn = document.createElement('button');
+            btn.innerText = n;
+            btn.onclick = function() {
+                if(selectedNum) selectedNum.classList.remove('selected');
+                btn.classList.add('selected');
+                selectedNum = btn;
+            };
+            grid.appendChild(btn);
+        }
+
+        function updateWin() {
+            let amt = document.getElementById('amount').value;
+            document.getElementById('winDisplay').innerText = amt * 75;
+        }
+
+        function sendToWA() {
+            let name = document.getElementById('custName').value;
+            let amt = document.getElementById('amount').value;
+            let win = amt * 75;
+
+            if(!name) { alert("කරුණාකර ඔබේ නම ඇතුළත් කරන්න!"); return; }
+            if(!selectedNum) { alert("කරුණාකර ජය අංකයක් තෝරන්න!"); return; }
+
+            let num = selectedNum.innerText;
+            let myNumber = "94705261404"; // ඔබේ අංකය ඇතුළත් කළා
+
+            let msg = `*--- මහජන සම්පත අනුමාන පත ---*%0A*නම:* ${name}%0A*තෝරාගත් අංකය:* [ ${num} ]%0A*ඔට්ටුව:* රු. ${amt}%0A*දිනුම් මුදල:* රු. ${win}%0A----------------------------%0A*සටහන:* කරුණාකර අතට මුදල් ගෙවා මෙම රිසිට්පත තහවුරු කරගන්න.`;
+
+            window.open(`https://wa.me/${myNumber}?text=${msg}`);
+        }
+    </script>
+</body>
+</html>
