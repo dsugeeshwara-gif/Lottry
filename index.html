@@ -6,42 +6,46 @@
     <title>මහජන සම්පත - Lucky Checker</title>
     <style>
         body { font-family: 'Segoe UI', sans-serif; text-align: center; background-color: #f0f2f5; padding: 15px; }
-        .receipt-card { background: white; padding: 25px; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); max-width: 450px; margin: auto; border-top: 10px solid #2c3e50; }
-        .grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; margin: 15px 0; max-height: 200px; overflow-y: auto; padding: 10px; border: 1px solid #ddd; }
-        button { padding: 12px; font-size: 16px; border: 1px solid #ddd; background: #fff; border-radius: 5px; cursor: pointer; }
-        .selected { background: #2c3e50 !important; color: #fff; font-weight: bold; }
-        input { padding: 12px; width: 80%; margin: 10px 0; border-radius: 5px; border: 1px solid #ccc; font-size: 16px; text-align: center; }
-        .btn-submit { background: #25D366; color: white; padding: 15px; width: 100%; border: none; border-radius: 10px; font-size: 18px; font-weight: bold; cursor: pointer; margin-top: 10px; }
-        .result-section { background: #fff8e1; padding: 15px; border-radius: 10px; margin-top: 20px; border: 1px solid #ffa000; }
-        .win-msg { color: #27ae60; font-weight: bold; font-size: 18px; }
-        .lost-msg { color: #c0392b; font-weight: bold; font-size: 18px; }
+        .card { background: white; padding: 25px; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); max-width: 450px; margin: auto; border-top: 10px solid #d9534f; }
+        .grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; margin: 15px 0; max-height: 250px; overflow-y: auto; padding: 10px; border: 1px solid #eee; }
+        button { padding: 12px; font-size: 16px; border: 1px solid #ddd; background: #fff; border-radius: 8px; cursor: pointer; }
+        .selected { background: #d9534f !important; color: #fff; font-weight: bold; }
+        input { padding: 12px; width: 90%; margin: 10px 0; border-radius: 8px; border: 1px solid #ccc; font-size: 16px; text-align: center; }
+        .limit-note { color: #d9534f; font-weight: bold; font-size: 14px; margin: 10px 0; }
+        .btn-submit { background: #25D366; color: white; padding: 18px; width: 100%; border: none; border-radius: 12px; font-size: 18px; font-weight: bold; cursor: pointer; }
+        .check-box { background: #e3f2fd; padding: 15px; border-radius: 12px; margin-top: 20px; border: 1px solid #2196f3; }
     </style>
 </head>
 <body>
 
-    <div class="receipt-card">
+    <div class="card">
         <h2>🏆 මහජන සම්පත 🏆</h2>
         <input type="text" id="custName" placeholder="ඔබේ නම">
 
-        <p>අංකය තෝරන්න (00-99):</p>
+        <p style="font-weight: bold;">ජය අංකය තෝරන්න (00-99):</p>
         <div class="grid" id="grid"></div>
 
-        <p>ඔට්ටුව (රු.): <input type="number" id="amt" value="100" min="100" oninput="updateWin()"></p>
-        <p>ලැබෙන දිනුම: <b>රු. <span id="winDisp">7500</span></b></p>
+        <div style="background: #fff5f5; padding: 10px; border-radius: 10px;">
+            <p class="limit-note">⚠️ උපරිම ඔට්ටුව රු. 200/- කි</p>
+            ඔට්ටුව: රු. <input type="number" id="amount" value="100" min="100" max="200" oninput="updateWin()">
+            <p>දිනුම් මුදල: <b style="color: #c9302c;">රු. <span id="winDisplay">7500</span></b></p>
+        </div>
 
-        <button class="btn-submit" onclick="sendWA()">රිසිට්පත එවන්න 📩</button>
+        <button class="btn-submit" onclick="sendToWA()">රිසිට්පත එවන්න 📩</button>
 
-        <div class="result-section">
-            <h4>🔍 දිනුම් පරීක්ෂක (Results Checker)</h4>
-            <p style="font-size: 12px;">ලොතරැයි ඇදීමෙන් පසු මෙහි අංකය බලන්න</p>
-            <input type="number" id="winningNumInput" placeholder="අද දිනුම් අංකය (00-99)">
-            <button onclick="checkResult()" style="background: #3498db; color: white; width: 100%; border: none; padding: 10px; border-radius: 5px; font-weight: bold;">දිනුම්දැයි බලන්න</button>
-            <div id="checkResultMsg" style="margin-top: 10px;"></div>
+        <div class="check-box">
+            <h4>🔍 දිනුම් පරීක්ෂක</h4>
+            <p style="font-size: 12px;">දිනුම් අංකය සමඟ ඔබේ අංකය සසඳන්න</p>
+            <button onclick="checkResult()" style="background: #2196f3; color: white; border: none; padding: 12px; width: 100%; border-radius: 8px; font-weight: bold; cursor: pointer;">මම දිනුම්ද?</button>
+            <div id="resultMsg" style="margin-top: 10px; font-weight: bold;"></div>
         </div>
     </div>
 
     <script>
-        let selectedNum = null;
+        // --- ADMIN පාලනය: අද දිනුම් අංකය මෙතැනට ඇතුළත් කරන්න ---
+        const ACTUAL_WINNING_NUMBER = "26"; 
+
+        let selectedBtn = null;
         const grid = document.getElementById('grid');
 
         for (let i = 0; i < 100; i++) {
@@ -49,36 +53,38 @@
             let btn = document.createElement('button');
             btn.innerText = n;
             btn.onclick = function() {
-                if(selectedNum) selectedNum.classList.remove('selected');
+                if(selectedBtn) selectedBtn.classList.remove('selected');
                 btn.classList.add('selected');
-                selectedNum = btn;
+                selectedBtn = btn;
             };
             grid.appendChild(btn);
         }
 
         function updateWin() {
-            document.getElementById('winDisp').innerText = document.getElementById('amt').value * 75;
+            let amt = document.getElementById('amount').value;
+            if (amt > 200) {
+                alert("උපරිම ඔට්ටුව රු. 200 කි!");
+                document.getElementById('amount').value = 200;
+                amt = 200;
+            }
+            document.getElementById('winDisplay').innerText = amt * 75;
         }
 
-        function sendWA() {
+        function sendToWA() {
             let name = document.getElementById('custName').value;
-            let amt = document.getElementById('amt').value;
-            if(!name || !selectedNum) { alert("නම සහ අංකය ඇතුළත් කරන්න!"); return; }
-            let msg = `*අනුමාන පත*%0Aනම: ${name}%0Aඅංකය: [ ${selectedNum.innerText} ]%0Aඔට්ටුව: රු. ${amt}%0Aදිනුම: රු. ${amt*75}`;
+            let amt = document.getElementById('amount').value;
+            if(!name || !selectedBtn) { alert("නම සහ අංකය ඇතුළත් කරන්න!"); return; }
+            let msg = `*නිල රිසිට්පත*%0Aනම: ${name}%0Aඅංකය: [ ${selectedBtn.innerText} ]%0Aඔට්ටුව: රු. ${amt}%0Aදිනුම: රු. ${amt*75}`;
             window.open(`https://wa.me/94705261404?text=${msg}`);
         }
 
         function checkResult() {
-            let winNum = document.getElementById('winningNumInput').value;
-            if(winNum === "" || !selectedNum) { alert("දිනුම් අංකය සහ ඔබේ අංකය ඇතුළත් කරන්න!"); return; }
-            
-            let myNum = selectedNum.innerText;
-            let display = document.getElementById('checkResultMsg');
-
-            if (parseInt(winNum) === parseInt(myNum)) {
-                display.innerHTML = `<span class="win-msg">🎉 සුබ පැතුම්! ඔබ දිනා ඇත! <br> වහාම ඔබේ රිසිට්පත යොමු කරන්න.</span>`;
+            if(!selectedBtn) { alert("පළමුව ඔබේ අංකය තෝරන්න!"); return; }
+            let display = document.getElementById('resultMsg');
+            if(selectedBtn.innerText === ACTUAL_WINNING_NUMBER) {
+                display.innerHTML = "<span style='color: green;'>🎉 සුබ පැතුම්! ඔබ දිනා ඇත!</span>";
             } else {
-                display.innerHTML = `<span class="lost-msg">❌ කණගාටුයි! අද ඔබට දිනුමක් නැත. <br> නැවත උත්සාහ කරන්න.</span>`;
+                display.innerHTML = "<span style='color: red;'>❌ අද ඔබට දිනුමක් නැත.</span>";
             }
         }
     </script>
